@@ -38,34 +38,38 @@ class Journal {
     }
 
     public void SaveToFile(string filename) {
-        using (StreamWriter writer = new StreamWriter(filename)) {
-            foreach (JournalEntry entry in entries) {
-                writer.WriteLine($"{entry.prompt},{entry.response},{entry.date}");
-            }
+    using (StreamWriter writer = new StreamWriter(filename)) {
+        writer.WriteLine("Prompt,Response,Date"); // Add headers
+        foreach (JournalEntry entry in entries) {
+            writer.WriteLine($"\"{entry.prompt}\",\"{entry.response}\",\"{entry.date}\""); // Use quotes and escape quotes
         }
-        Console.WriteLine($"Journal saved to {filename}.");
     }
+    Console.WriteLine($"Journal saved to {filename}.");
+}
 
-    public void LoadFromFile(string filename) {
-        entries.Clear();
-        using (StreamReader reader = new StreamReader(filename)) {
-            string line;
+public void LoadFromFile(string filename) {
+    entries.Clear();
+    using (StreamReader reader = new StreamReader(filename)) {
+        string line = reader.ReadLine();
+        if (line != null && line == "Prompt,Response,Date") { // Check headers
             while ((line = reader.ReadLine()) != null) {
                 string[] parts = line.Split(',');
                 if (parts.Length == 3) {
-                    string prompt = parts[0];
-                    string response = parts[1];
-                    DateTime date = DateTime.Parse(parts[2]);
-                    JournalEntry entry = new JournalEntry(prompt, response);
-                    entry.date = date;
-                    entries.Add(entry);
+                    string prompt = parts[0].Trim('\"'); // Remove quotes
+                    string response = parts[1].Trim('\"'); // Remove quotes
+                    DateTime date;
+                    if (DateTime.TryParse(parts[2].Trim('\"'), out date)) { // Remove quotes and parse date
+                        JournalEntry entry = new JournalEntry(prompt, response);
+                        entry.date = date;
+                        entries.Add(entry);
+                    }
                 }
             }
         }
-        Console.WriteLine($"Journal loaded from {filename}.");
     }
+    Console.WriteLine($"Journal loaded from {filename}.");
 }
-
+}
 class PromptGenerator {
     private List<string> prompts;
     private Random random;
