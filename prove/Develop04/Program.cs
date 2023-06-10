@@ -1,16 +1,15 @@
 using System;
 using System.Threading;
 
-// Base class for activities
+
 public abstract class MindfulnessActivity
-{
-    protected int duration;
+{   protected int duration;
 
     public MindfulnessActivity(int duration)
     {
         this.duration = duration;
+        ActivityLog.IncrementActivityCount(GetType().Name);
     }
-
     public abstract void Start();
 
     protected void ShowSpinner(int seconds)
@@ -30,7 +29,35 @@ public abstract class MindfulnessActivity
     }
 }
 
-// Breathing Activity
+public class MeditationActivity : MindfulnessActivity
+{
+    private static int meditationCount = 0;
+
+    public MeditationActivity(int duration) : base(duration)
+    {
+        meditationCount++;
+    }
+
+    public override void Start()
+    {
+        Console.WriteLine("Meditation Activity");
+        Console.WriteLine("This activity will help you relax and find inner peace through meditation.");
+        Console.WriteLine("Duration: {0} seconds", duration);
+        Console.WriteLine("Prepare to begin...");
+        Thread.Sleep(3000);
+
+        // Add meditation activity logic here...
+
+        Console.WriteLine("Good job! You have completed the Meditation Activity for {0} seconds.", duration);
+        Thread.Sleep(3000);
+    }
+
+    public static int GetMeditationCount()
+    {
+        return meditationCount;
+    }
+}
+
 public class BreathingActivity : MindfulnessActivity
 {
     public BreathingActivity(int duration) : base(duration)
@@ -58,7 +85,7 @@ public class BreathingActivity : MindfulnessActivity
     }
 }
 
-// Reflection Activity
+
 public class ReflectionActivity : MindfulnessActivity
 {
     private string[] prompts = {
@@ -112,7 +139,7 @@ public class ReflectionActivity : MindfulnessActivity
     }
 }
 
-// Listing Activity
+
 public class ListingActivity : MindfulnessActivity
 {
     private string[] prompts = {
@@ -161,7 +188,57 @@ public class ListingActivity : MindfulnessActivity
     }
 }
 
-// Main program
+public class ActivityLog
+{
+    private static Dictionary<string, int> activityCounts = new Dictionary<string, int>();
+
+    public static void IncrementActivityCount(string activityName)
+    {
+        if (activityCounts.ContainsKey(activityName))
+        {
+            activityCounts[activityName]++;
+        }
+        else
+        {
+            activityCounts[activityName] = 1;
+        }
+    }
+
+    public static void SaveLogToFile(string filename)
+    {
+        using (StreamWriter writer = new StreamWriter(filename))
+        {
+            foreach (var activityCount in activityCounts)
+            {
+                writer.WriteLine("{0}: {1}", activityCount.Key, activityCount.Value);
+            }
+        }
+    }
+
+    public static void LoadLogFromFile(string filename)
+    {
+        activityCounts.Clear();
+
+        using (StreamReader reader = new StreamReader(filename))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                string[] parts = line.Split(':');
+                if (parts.Length == 2)
+                {
+                    string activityName = parts[0].Trim();
+                    int count;
+                    if (int.TryParse(parts[1], out count))
+                    {
+                        activityCounts[activityName] = count;
+                    }
+                }
+            }
+        }
+    }
+}
+
 public class Program
 {
     public static void Main(string[] args)
@@ -175,41 +252,66 @@ public class Program
             Console.WriteLine("1. Breathing Activity");
             Console.WriteLine("2. Reflection Activity");
             Console.WriteLine("3. Listing Activity");
-            Console.WriteLine("4. Exit");
+            Console.WriteLine("4. Meditation Activity");
+            Console.WriteLine("5. Save Log");
+            Console.WriteLine("6. Load Log");
+            Console.WriteLine("7. Exit");
             Console.Write("Enter your choice: ");
 
             string choice = Console.ReadLine();
+            Console.WriteLine();
 
             switch (choice)
             {
                 case "1":
-                    Console.Write("Enter duration (in seconds) for Breathing Activity: ");
-                    int breathingDuration = int.Parse(Console.ReadLine());
-                    BreathingActivity breathingActivity = new BreathingActivity(breathingDuration);
-                    breathingActivity.Start();
-                    break;
+                    // Create Breathing Activity
+                    // ...
+
                 case "2":
-                    Console.Write("Enter duration (in seconds) for Reflection Activity: ");
-                    int reflectionDuration = int.Parse(Console.ReadLine());
-                    ReflectionActivity reflectionActivity = new ReflectionActivity(reflectionDuration);
-                    reflectionActivity.Start();
-                    break;
+                    // Create Reflection Activity
+                    // ...
+
                 case "3":
-                    Console.Write("Enter duration (in seconds) for Listing Activity: ");
-                    int listingDuration = int.Parse(Console.ReadLine());
-                    ListingActivity listingActivity = new ListingActivity(listingDuration);
-                    listingActivity.Start();
-                    break;
+                    // Create Listing Activity
+                    // ...
+
                 case "4":
+                    Console.Write("Enter duration for Meditation Activity (in seconds): ");
+                    int meditationDuration = int.Parse(Console.ReadLine());
+                    MeditationActivity meditationActivity = new MeditationActivity(meditationDuration);
+                    meditationActivity.Start();
+                    break;
+
+                case "5":
+                    Console.Write("Enter the filename to save the log: ");
+                    string saveFilename = Console.ReadLine();
+                    ActivityLog.SaveLogToFile(saveFilename);
+                    Console.WriteLine("Log saved successfully.");
+                    break;
+
+                case "6":
+                    Console.Write("Enter the filename to load the log: ");
+                    string loadFilename = Console.ReadLine();
+                    ActivityLog.LoadLogFromFile(loadFilename);
+                    Console.WriteLine("Log loaded successfully.");
+                    break;
+
+                case "7":
                     exit = true;
                     break;
+
                 default:
                     Console.WriteLine("Invalid choice. Please try again.");
                     break;
             }
 
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
+            if (!exit)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
         }
     }
 }
+
