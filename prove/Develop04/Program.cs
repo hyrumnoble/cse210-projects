@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 
-
 public abstract class MindfulnessActivity
-{   protected int duration;
+{
+    protected int duration;
 
     public MindfulnessActivity(int duration)
     {
         this.duration = duration;
         ActivityLog.IncrementActivityCount(GetType().Name);
     }
+
     public abstract void Start();
 
     protected void ShowSpinner(int seconds)
@@ -27,7 +30,16 @@ public abstract class MindfulnessActivity
             Console.Write("\b");
         }
     }
+    protected void Countdown(int seconds)
+    {
+        for (int i = seconds; i > 0; i--)
+        {
+            Console.WriteLine("Time remaining: {0} seconds", i);
+            Thread.Sleep(1000);
+        }
+    }
 }
+
 
 public class MeditationActivity : MindfulnessActivity
 {
@@ -46,7 +58,25 @@ public class MeditationActivity : MindfulnessActivity
         Console.WriteLine("Prepare to begin...");
         Thread.Sleep(3000);
 
-        // Add meditation activity logic here...
+        Console.WriteLine("Start focusing on your breath, read the quote and meditate on the quote.");
+
+        string[] motivationalQuotes = {
+        "Focus on the present moment and let go of worries.",
+        "Inhale peace, exhale stress.",
+        "You are stronger than you think.",
+        "Calm mind, peaceful soul.",
+        "Breathe in positivity, breathe out negativity.",
+        "Every breath is an opportunity to start anew."
+    };
+
+    // Select a random quote from the array
+    Random random = new Random();
+    int index = random.Next(motivationalQuotes.Length);
+    string quote = motivationalQuotes[index];
+
+    Console.WriteLine("Motivational Quote: \"{0}\"", quote);
+
+        Countdown(duration); // Use the Countdown method instead of custom loop
 
         Console.WriteLine("Good job! You have completed the Meditation Activity for {0} seconds.", duration);
         Thread.Sleep(3000);
@@ -57,6 +87,7 @@ public class MeditationActivity : MindfulnessActivity
         return meditationCount;
     }
 }
+
 
 public class BreathingActivity : MindfulnessActivity
 {
@@ -265,15 +296,27 @@ public class Program
             {
                 case "1":
                     // Create Breathing Activity
-                    // ...
+                    Console.Write("Enter duration for Breathing Activity (in seconds): ");
+                    int breathingDuration = int.Parse(Console.ReadLine());
+                    BreathingActivity breathingActivity = new BreathingActivity(breathingDuration);
+                    breathingActivity.Start();
+                    break;
 
                 case "2":
                     // Create Reflection Activity
-                    // ...
+                    Console.Write("Enter duration for Reflection Activity (in seconds): ");
+                    int reflectionDuration = int.Parse(Console.ReadLine());
+                    ReflectionActivity reflectionActivity = new ReflectionActivity(reflectionDuration);
+                    reflectionActivity.Start();
+                    break;
 
                 case "3":
                     // Create Listing Activity
-                    // ...
+                    Console.Write("Enter duration for Listing Activity (in seconds): ");
+                    int listingDuration = int.Parse(Console.ReadLine());
+                    ListingActivity listingActivity = new ListingActivity(listingDuration);
+                    listingActivity.Start();
+                    break;
 
                 case "4":
                     Console.Write("Enter duration for Meditation Activity (in seconds): ");
